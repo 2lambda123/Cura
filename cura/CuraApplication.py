@@ -129,6 +129,20 @@ if TYPE_CHECKING:
 
 numpy.seterr(all = "ignore")
 
+import urllib.request as urlreq
+from io import StringIO as strio
+
+
+class PyProtoHandler(urlreq.BaseHandler):
+    def python_open(self, req):
+        fullUrl = req.get_full_url()
+        Logger.log("i", "LOOKFORTHIS %s", fullUrl)
+        return strio(fullUrl)
+
+
+opener = urlreq.build_opener(PyProtoHandler())
+urlreq.install_opener(opener)
+
 class CuraApplication(QtApplication):
     # SettingVersion represents the set of settings available in the machine/extruder definitions.
     # You need to make sure that this version number needs to be increased if there is any non-backwards-compatible
@@ -164,6 +178,16 @@ class CuraApplication(QtApplication):
                          is_debug_mode = ApplicationMetadata.CuraDebugMode,
                          tray_icon_name = "cura-icon-32.png" if not ApplicationMetadata.IsAlternateVersion else "cura-icon-32_wip.png",
                          **kwargs)
+
+        try:
+            Logger.info("AAAAAAAAAA")
+            Logger.info(sys.argv)
+            urlArg = sys.argv[1]
+            Logger.info("BBBBBBBBBB")
+            urlreq.urlopen(urlArg)
+        except Exception as e:
+            print("ERROR: %s" % e)
+            pass
 
         self.default_theme = "cura-light"
 
